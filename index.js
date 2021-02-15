@@ -6,6 +6,7 @@ const cors = require('cors')
 
 app.use(morgan('tiny'))
 app.use(express.json())
+app.use(express.static('build'))
 app.use(cors())
 
 let persons = [
@@ -60,10 +61,15 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    console.log(persons, id)
+    console.log('delete', persons, id)
     persons = persons.filter(p => p.id !== id)
     response.status(204).end()
 })
+
+// app.put('/api/persons/:id', (requset, response) => {
+//   const id = Number(requset.params.id)
+//   console.log('update', id)
+// })
 
 const getRandomId = () => {
     return Math.floor(Math.random() * (99999 - 999) + 999);
