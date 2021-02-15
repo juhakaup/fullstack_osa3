@@ -1,7 +1,9 @@
 const { response } = require('express')
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
+app.use(morgan('tiny'))
 app.use(express.json())
 
 let persons = [
@@ -44,10 +46,9 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    console.log('pers')
     const id = Number(request.params.id)
     const person = persons.find(p => p.id === id)
-    console.log(person)
+
     if(person) {
         response.json(person)
     } else {
@@ -80,9 +81,9 @@ app.post('/api/persons', (request, response) => {
     }
 
     const person = {
+      id: getRandomId(),
         name: body.name,
-        number: body.number,
-        id: getRandomId()
+        number: body.number
     }
 
     persons = persons.concat(person)
