@@ -11,8 +11,6 @@ const password = process.argv[2]
 
 const url = `mongodb+srv://juhaka:${password}@cluster0.gplfm.mongodb.net/puhelinluettelo?retryWrites=true&w=majority`
 
-// mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
-
 const contactSchema = new mongoose.Schema({
     name: String,
     number: String,
@@ -35,8 +33,6 @@ const createContact = (name, number) => {
     })  
     return contact
 }
-        
-// createContact("testi3", "12345")
 
 const findAll = () => {
     mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })

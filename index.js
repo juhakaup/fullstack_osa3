@@ -1,8 +1,10 @@
+require('dotenv').config()
 const { response } = require('express')
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
 const cors = require('cors')
+const Contact = require('./models/contact')
 
 app.use(morgan('tiny'))
 app.use(express.json())
@@ -37,7 +39,9 @@ app.get('/', (request, response) => {
   })
   
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+  Contact.find({}).then(result => {
+    res.json(result)
+  })
 })
 
 app.get('/info', (request, response) => {
@@ -88,15 +92,14 @@ app.post('/api/persons', (request, response) => {
         return response.status(400).json({error: 'number missing'})
     }
 
-    const person = {
-      id: getRandomId(),
+    const person = new Contact({
         name: body.name,
         number: body.number
-    }
+    })
 
-    persons = persons.concat(person)
-
-    response.json(person)
+    person.save().then(savedContact => {
+      response.json(savedContact)
+    })
 })
   
 const PORT = process.env.PORT || 3001
