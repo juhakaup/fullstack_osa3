@@ -52,56 +52,80 @@ app.get('/info', (request, response) => {
     )
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(p => p.id === id)
-
-    if(person) {
-        response.json(person)
-    } else {
-        response.status(404).end()
-    }
+app.get('/api/persons/:id', (request, response, next) => {
+  Contact.findById(request.params.id)
+    .then(contact => {
+      if (contact) {
+        response.json(contact)
+      } else {
+        response.status(400).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    console.log('delete', persons, id)
-    persons = persons.filter(p => p.id !== id)
-    response.status(204).end()
+app.delete('/api/persons/:id', (request, response, next) => {
+  Contact.findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 })
-
-// app.put('/api/persons/:id', (requset, response) => {
-//   const id = Number(requset.params.id)
-//   console.log('update', id)
-// })
 
 const getRandomId = () => {
     return Math.floor(Math.random() * (99999 - 999) + 999);
   }
 
 app.post('/api/persons', (request, response) => {
-    const body = request.body
-    
-    if (!body.name) {
-      return response.status(400).json({error: 'name missing'})
-    }
-    if (persons.map(p => p.name).includes(body.name)) {
-      return response.status(400).json({error: 'name must be unique'})
-    } 
-    if (!body.number) {
-        return response.status(400).json({error: 'number missing'})
-    }
-
-    const person = new Contact({
-        name: body.name,
-        number: body.number
-    })
-
-    person.save().then(savedContact => {
-      response.json(savedContact)
-    })
-})
+  const body = request.body
   
+  if (!body.name) {
+    return response.status(400).json({error: 'name missing'})
+  }
+  if (persons.map(p => p.name).includes(body.name)) {
+    return response.status(400).json({error: 'name must be unique'})
+  } 
+  if (!body.number) {
+      return response.status(400).json({error: 'number missing'})
+  }
+
+  const person = new Contact({
+      name: body.name,
+      number: body.number
+  })
+
+  person.save().then(savedContact => {
+    response.json(savedContact)
+  })
+})
+
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+
+  const contact = {
+    name: body.name,
+    number: body.number,
+  }
+
+  Contact.findByIdAndUpdate(request.params.id, contact, {new: true})
+    .then(updatedContact => {
+      response.json(updatedContact)
+    })
+    .catch(error => next(error))
+}) 
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformed id'})
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
+
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
