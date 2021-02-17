@@ -76,27 +76,19 @@ const getRandomId = () => {
     return Math.floor(Math.random() * (99999 - 999) + 999);
   }
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
-  
-  if (!body.name) {
-    return response.status(400).json({error: 'name missing'})
-  }
-  if (persons.map(p => p.name).includes(body.name)) {
-    return response.status(400).json({error: 'name must be unique'})
-  } 
-  if (!body.number) {
-      return response.status(400).json({error: 'number missing'})
-  }
 
   const person = new Contact({
-      name: body.name,
-      number: body.number
+    name: body.name,
+    number: body.number
   })
 
-  person.save().then(savedContact => {
-    response.json(savedContact)
+  person.save()
+  .then(savedContact => {
+    response.json(savedContact.toJSON)
   })
+  .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -115,10 +107,12 @@ app.put('/api/persons/:id', (request, response, next) => {
 }) 
 
 const errorHandler = (error, request, response, next) => {
-  console.error(error)
+  console.error(error.message)
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformed id'})
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
   }
 
   next(error)
