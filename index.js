@@ -1,5 +1,5 @@
 require('dotenv').config()
-const { response } = require('express')
+// const { response } = require('express')
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
@@ -14,30 +14,30 @@ app.use(cors())
 let persons = [
   {
     id: 1,
-    name: "Arto Hellas",
-    number: "040-123456"
-  },   
+    name: 'Arto Hellas',
+    number: '040-123456'
+  },
   {
     id: 2,
-    name: "Ada Lovelace",
-    number: "39-23-124131"
-  },   
+    name: 'Ada Lovelace',
+    number: '39-23-124131'
+  },
   {
     id: 3,
-    name: "Dan Abramov",
-    number: "12-43-1231231"
-  },   
+    name: 'Dan Abramov',
+    number: '12-43-1231231'
+  },
   {
     id: 4,
-    name: "Mary Poppendick",
-    number: "39-23-987234"
+    name: 'Mary Poppendick',
+    number: '39-23-987234'
   }
 ]
 
 app.get('/', (request, response) => {
-    response.send('<p>server up</p>')
-  })
-  
+  response.send('<p>server up</p>')
+})
+
 app.get('/api/persons', (req, res) => {
   Contact.find({}).then(result => {
     res.json(result)
@@ -45,11 +45,11 @@ app.get('/api/persons', (req, res) => {
 })
 
 app.get('/info', (request, response) => {
-    numPeople = persons.length
-    time = new Date()
-    response.send(
-        `<p>Phonebook has info for ${numPeople} people</p><p>${time}</p`
-    )
+  const numPeople = persons.length
+  const time = new Date()
+  response.send(
+    `<p>Phonebook has info for ${numPeople} people</p><p>${time}</p`
+  )
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -66,15 +66,11 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Contact.findByIdAndRemove(request.params.id)
-    .then(result => {
+    .then(response => {
       response.status(204).end()
     })
     .catch(error => next(error))
 })
-
-const getRandomId = () => {
-    return Math.floor(Math.random() * (99999 - 999) + 999);
-  }
 
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
@@ -85,10 +81,10 @@ app.post('/api/persons', (request, response, next) => {
   })
 
   person.save()
-  .then(savedContact => {
-    response.json(savedContact.toJSON)
-  })
-  .catch(error => next(error))
+    .then(savedContact => {
+      response.json(savedContact.toJSON)
+    })
+    .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -99,18 +95,18 @@ app.put('/api/persons/:id', (request, response, next) => {
     number: body.number,
   }
 
-  Contact.findByIdAndUpdate(request.params.id, contact, {new: true})
+  Contact.findByIdAndUpdate(request.params.id, contact, { new: true })
     .then(updatedContact => {
       response.json(updatedContact)
     })
     .catch(error => next(error))
-}) 
+})
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
   if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformed id'})
+    return response.status(400).send({ error: 'malformed id' })
   } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
   }
